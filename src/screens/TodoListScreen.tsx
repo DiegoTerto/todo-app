@@ -17,7 +17,7 @@ import { useAsyncStorage } from '../hooks/useAsyncStorage'
 import TodoItemList from '../components/TodoItemList'
 import { storageTodoListKey } from '../utils/constants'
 
-const initialTodoItem: TodoItemType = { id: 1, description: '', title: '' }
+const initialTodoItem: TodoItemType = { id: -1, description: '', title: '' }
 
 type TodoListScreenProps = NativeStackScreenProps<
   ToDoStackParamList,
@@ -59,6 +59,19 @@ const TodoListScreen = ({ navigation }: TodoListScreenProps) => {
       return
     }
 
+    const itemEdited = lsTodoItem.filter(item => item.id === todoItem.id)[0]
+
+    if (itemEdited) {
+      itemEdited.title = todoItem.title
+      itemEdited.description = todoItem.description
+      const todoItemListCopy = [...lsTodoItem]
+      console.log(todoItemListCopy)
+      setLsTodoItem(todoItemListCopy)
+      setTodoItem(initialTodoItem)
+      setModalVisible(false)
+      return;
+    }
+
     const todoItemListCopy = [...lsTodoItem]
 
     const lastItemIdPlusOne = lsTodoItem[lsTodoItem.length - 1].id + 1
@@ -85,6 +98,13 @@ const TodoListScreen = ({ navigation }: TodoListScreenProps) => {
     },
     [lsTodoItem]
   )
+
+  const handleEditItem = React.useCallback(
+    (item: TodoItemType) => {
+      setTodoItem(item)
+
+      setModalVisible(true)
+    }, [])
 
   return (
     <View style={styles.container}>
@@ -122,13 +142,13 @@ const TodoListScreen = ({ navigation }: TodoListScreenProps) => {
             style={[styles.button, styles.buttonClose]}
             onPress={handleAddItem}
           >
-            <Text style={styles.textStyle}>Adicionar</Text>
+            <Text style={styles.textStyle}>Salvar</Text>
           </Pressable>
         </View>
       </Modal>
 
       {/* Lista de tarefas salvas */}
-      <TodoItemList onDelete={handleDeleteItem} />
+      <TodoItemList key={JSON.stringify(lsTodoItem)} onDelete={handleDeleteItem} onEdit={handleEditItem} />
     </View>
   )
 }

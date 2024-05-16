@@ -10,14 +10,22 @@ import {
 import { Swipeable } from 'react-native-gesture-handler'
 import TodoItemType from '../types/TodoItem'
 
+type IconType = 'delete' | 'edit'
+
 const RightSwipeActions = ({
   item,
-  onDelete,
+  onClick,
   progress,
+  iconColor,
+  backgroundColor,
+  iconName
 }: {
   item: TodoItemType
-  onDelete: (item: TodoItemType) => void
-  progress: Animated.AnimatedInterpolation<number>
+  onClick: (item: TodoItemType) => void
+  progress: Animated.AnimatedInterpolation<number>,
+  iconColor: string,
+  backgroundColor: string,
+  iconName: IconType
 }) => {
   const transform = progress.interpolate({
     inputRange: [0, 1],
@@ -28,14 +36,14 @@ const RightSwipeActions = ({
       style={[
         styles.item,
         {
-          backgroundColor: 'lightcoral',
+          backgroundColor: backgroundColor,
           alignItems: 'flex-end',
           transform: [{ translateX: transform }],
         },
       ]}
     >
-      <TouchableOpacity onPress={() => onDelete(item)}>
-        <AntDesign name="delete" size={18} color="black" />
+      <TouchableOpacity onPress={() => onClick(item)}>
+        <AntDesign name={iconName} size={18} color={iconColor} />
       </TouchableOpacity>
     </Animated.View>
   )
@@ -44,20 +52,35 @@ const RightSwipeActions = ({
 const TodoItem = ({
   todoItem,
   onDelete,
+  onEdit,
 }: {
   todoItem: TodoItemType
   onDelete: (item: TodoItemType) => void
+  onEdit: (item: TodoItemType) => void
 }) => {
   return (
     <Swipeable
       renderRightActions={(
         progressAnimatedValue: Animated.AnimatedInterpolation<string | number>
       ) => (
-        <RightSwipeActions
-          item={todoItem}
-          onDelete={onDelete}
-          progress={progressAnimatedValue}
-        />
+        <>
+          <RightSwipeActions
+            item={todoItem}
+            onClick={onDelete}
+            progress={progressAnimatedValue}
+            iconColor='black'
+            backgroundColor='lightcoral'
+            iconName='delete'
+          />
+          <RightSwipeActions
+            item={todoItem}
+            onClick={onEdit}
+            progress={progressAnimatedValue}
+            iconColor='white'
+            backgroundColor='lightgreen'
+            iconName='edit'
+          />
+        </>
       )}
     >
       <View style={styles.item}>
