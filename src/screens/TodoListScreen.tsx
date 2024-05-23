@@ -21,7 +21,8 @@ const initialTodoItem: TodoItemType = { id: -1, description: '', title: '' }
 
 type TodoListScreenProps = NativeStackScreenProps<
   ToDoStackParamList,
-  'TodoList'
+  'TodoList',
+  'Login'
 >
 
 const TodoListScreen = ({ navigation }: TodoListScreenProps) => {

@@ -7,7 +7,7 @@ export const useAsyncStorage = <T>(key: string, initialValue: T): [lsItem: T, se
   const getLsItem = async () => {
     try {
       const item = await AsyncStorage.getItem(key)
-      const parsedItem = item ? JSON.parse(item) : initialValue;
+      const parsedItem = item ? JSON.parse(item) : initialValue
       setLocalStorageState(parsedItem)
     } catch (e) {
       console.log("getItem",e)

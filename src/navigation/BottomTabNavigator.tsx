@@ -2,10 +2,13 @@ import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { AntDesign } from '@expo/vector-icons'
 import { MainStackNavigator, ToDoListStackNavigator } from './StackNavigator'
+import { useAsyncStorage } from '@react-native-async-storage/async-storage'
+import { storageTokenKey } from '../utils/constants'
 
 export type TabParamList = {
   HomeTab: undefined
   TodoListTab: undefined
+  LoginTab: undefined
 }
 
 const Tab = createBottomTabNavigator<TabParamList>()
