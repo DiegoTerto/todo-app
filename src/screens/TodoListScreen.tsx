@@ -29,10 +29,7 @@ const TodoListScreen = ({ navigation }: TodoListScreenProps) => {
   const [modalVisible, setModalVisible] = React.useState(false)
   const [todoItem, setTodoItem] = React.useState<TodoItemType>(initialTodoItem)
 
-  const [lsTodoItem, setLsTodoItem] = useAsyncStorage<TodoItemType[]>(
-    storageTodoListKey,
-    []
-  )
+  const [lsTodoItem, setLsTodoItem] = React.useState<TodoItemType[]>([])
 
   React.useEffect(() => {
     navigation.setOptions({
@@ -45,52 +42,41 @@ const TodoListScreen = ({ navigation }: TodoListScreenProps) => {
         </TouchableOpacity>
       ),
     })
+
+    navigation.addListener('focus', async () => {
+      const response = await fetch('http://localhost:3000/tasks')
+      const responseJson = await response.json()
+      setLsTodoItem(responseJson.body)
+    })
   }, [navigation])
 
   const handleAddItem = async () => {
-    if (!todoItem) {
-      alert('Descrição da tarefa inválida!')
-      return
-    }
-
-    if (!lsTodoItem.length) {
-      setLsTodoItem([todoItem])
-      setTodoItem(initialTodoItem)
-      setModalVisible(false)
-      return
-    }
-
-    const itemEdited = lsTodoItem.filter(item => item.id === todoItem.id)[0]
-
-    if (itemEdited) {
-      itemEdited.title = todoItem.title
-      itemEdited.description = todoItem.description
-      const todoItemListCopy = [...lsTodoItem]
-      console.log(todoItemListCopy)
-      setLsTodoItem(todoItemListCopy)
-      setTodoItem(initialTodoItem)
-      setModalVisible(false)
-      return;
-    }
-
-    const todoItemListCopy = [...lsTodoItem]
-
-    const lastItemIdPlusOne = lsTodoItem[lsTodoItem.length - 1].id + 1
-
-    const newItem: TodoItemType = {
-      ...todoItem,
-      id: lastItemIdPlusOne,
-    }
-
-    todoItemListCopy.push(newItem)
-
-    setLsTodoItem(todoItemListCopy)
-    setTodoItem(initialTodoItem)
-    setModalVisible(false)
+    const response = await fetch('http://localhost:3000/tasks/', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({ title: todoItem.title, description: todoItem.description }),
+    })
+    const responseJson = await response.json()
+    const newLsTaskItem: TodoItemType[] = [...lsTodoItem, {
+      ...responseJson.body
+    }]
+    setLsTodoItem(newLsTaskItem);
   }
 
   const handleDeleteItem = React.useCallback(
-    (item: TodoItemType) => {
+    async (item: TodoItemType) => {
+      await fetch(`http://localhost:3000/tasks/${item.id}`, {
+        method: 'DELETE',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      })
       const index = lsTodoItem.findIndex((todo) => todo.id === item.id)
 
       const todoItemListCopy = lsTodoItem.toSpliced(index, 1)
@@ -149,7 +135,11 @@ const TodoListScreen = ({ navigation }: TodoListScreenProps) => {
       </Modal>
 
       {/* Lista de tarefas salvas */}
-      <TodoItemList key={JSON.stringify(lsTodoItem)} onDelete={handleDeleteItem} onEdit={handleEditItem} />
+      <TodoItemList
+      lsTodoItem={lsTodoItem}
+      key={JSON.stringify(lsTodoItem)}
+      onDelete={handleDeleteItem}
+      onEdit={handleEditItem} />
     </View>
   )
 }
